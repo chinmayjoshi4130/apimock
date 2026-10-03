@@ -1,9 +1,6 @@
 # ApiMock
 
-[![PyPI version](https://img.shields.io/pypi/v/apimock)](https://pypi.org/project/apimock/)
-[![Python versions](https://img.shields.io/pypi/pyversions/apimock)](https://pypi.org/project/apimock/)
 [![License](https://img.shields.io/github/license/chinmayjoshi4130/apimock)](LICENSE)
-[![Tests](https://github.com/chinmayjoshi4130/apimock/actions/workflows/test.yml/badge.svg)](https://github.com/chinmayjoshi4130/apimock/actions)
 
 A developer-focused local API mocking tool that generates a working HTTP mock server directly from **OpenAPI**, **Postman Collection**, **HAR**, or **ApiMock native format** specifications.
 
@@ -14,13 +11,13 @@ A developer-focused local API mocking tool that generates a working HTTP mock se
 ## Installation
 
 ```bash
-# From PyPI (when published)
-pip install apimock
-
-# From source
+# Clone and install locally (not on PyPI)
 git clone https://github.com/chinmayjoshi4130/apimock
 cd apimock
 pip install -e .
+
+# Or install without editable mode
+pip install .
 ```
 
 ---
