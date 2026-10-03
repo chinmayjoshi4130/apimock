@@ -1,9 +1,42 @@
 [project]
 name = "apimock"
 version = "0.1.0"
-description = "Local API mocking tool from OpenAPI specifications"
+description = "Local API mocking tool from OpenAPI, Postman, HAR, or native format specifications"
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.10"
+authors = [
+    {name = "Chinmay Joshi", email = "chinmayjoshi4130@gmail.com"}
+]
+maintainers = [
+    {name = "Chinmay Joshi", email = "chinmayjoshi4130@gmail.com"}
+]
+keywords = [
+    "api",
+    "mock",
+    "openapi",
+    "postman",
+    "har",
+    "testing",
+    "development",
+    "http",
+    "rest"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+]
 dependencies = [
     "click>=8.1.0",
     "pyyaml>=6.0",
@@ -11,8 +44,28 @@ dependencies = [
     "aiohttp>=3.9.0",
     "faker>=25.0.0",
 ]
+urls = {
+    "Homepage" = "https://github.com/chinmayjoshi4130/apimock",
+    "Repository" = "https://github.com/chinmayjoshi4130/apimock",
+    "Issues" = "https://github.com/chinmayjoshi4130/apimock/issues",
+    "Documentation" = "https://github.com/chinmayjoshi4130/apimock/tree/main/docs",
+    "Changelog" = "https://github.com/chinmayjoshi4130/apimock/blob/main/CHANGELOG.md",
+}
+
 [project.scripts]
 apimock = "apimock.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-aiohttp>=2.0",
+    "black>=23.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+    "build>=1.0",
+    "twine>=4.0",
+]
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
@@ -22,3 +75,15 @@ build-backend = "setuptools.build_meta"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+asyncio_mode = "auto"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = "\\.pyi?$"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "I", "W", "UP", "B", "C4", "ARG"]
+ignore = ["E501", "ARG001", "ARG002"]
