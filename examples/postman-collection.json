@@ -1,0 +1,211 @@
+{
+  "info": {
+    "name": "Task Manager API",
+    "version": "1.0.0",
+    "description": "A simple task management API for testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "List Tasks",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/tasks?status=pending&limit=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks"],
+          "query": [
+            {
+              "key": "status",
+              "value": "pending"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[{\"id\": 1, \"title\": \"Learn Postman\", \"status\": \"pending\"}, {\"id\": 2, \"title\": \"Write tests\", \"status\": \"done\"}]"
+        }
+      ]
+    },
+    {
+      "name": "Get Task",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/tasks/42",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "42"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"id\": 42, \"title\": \"Learn Postman\", \"description\": \"Learn how to use Postman\", \"status\": \"pending\", \"created_at\": \"2024-01-15T10:00:00Z\"}"
+        },
+        {
+          "name": "Not Found",
+          "code": 404,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"error\": \"Not Found\", \"message\": \"Task not found\"}"
+        }
+      ]
+    },
+    {
+      "name": "Create Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"New Task\", \"description\": \"Task description\", \"status\": \"pending\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks"]
+        }
+      },
+      "response": [
+        {
+          "name": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"id\": 3, \"title\": \"New Task\", \"description\": \"Task description\", \"status\": \"pending\", \"created_at\": \"2024-01-15T10:30:00Z\"}"
+        }
+      ]
+    },
+    {
+      "name": "Update Task",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"status\": \"done\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/tasks/42",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "42"]
+        }
+      },
+      "response": [
+        {
+          "name": "Updated",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"id\": 42, \"title\": \"Learn Postman\", \"description\": \"Learn how to use Postman\", \"status\": \"done\", \"created_at\": \"2024-01-15T10:00:00Z\"}"
+        }
+      ]
+    },
+    {
+      "name": "Delete Task",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/tasks/42",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["tasks", "42"]
+        }
+      },
+      "response": [
+        {
+          "name": "Deleted",
+          "code": 204,
+          "header": []
+        }
+      ]
+    }
+  ]
+}

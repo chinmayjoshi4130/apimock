@@ -1,0 +1,24 @@
+[project]
+name = "apimock"
+version = "0.1.0"
+description = "Local API mocking tool from OpenAPI specifications"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.0",
+    "pyyaml>=6.0",
+    "jsonschema>=4.20.0",
+    "aiohttp>=3.9.0",
+    "faker>=25.0.0",
+]
+[project.scripts]
+apimock = "apimock.cli:main"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

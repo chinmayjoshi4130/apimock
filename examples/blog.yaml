@@ -1,0 +1,351 @@
+openapi: 3.0.3
+info:
+  title: Blog API
+  version: 1.0.0
+  description: A blog platform API with posts, authors, and tags
+servers:
+  - url: http://localhost:8080
+    description: Development server
+paths:
+  /posts:
+    get:
+      summary: List posts
+      description: Returns paginated list of published posts
+      parameters:
+        - name: tag
+          in: query
+          description: Filter by tag
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Filter by author ID
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Maximum posts to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [newest, oldest, popular]
+            default: newest
+      responses:
+        "200":
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostSummary"
+    post:
+      summary: Create a new post
+      description: Creates a draft post (requires authentication in real API)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          description: Invalid input
+  /posts/{slug}:
+    get:
+      summary: Get post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Post slug (URL-friendly identifier)
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "200":
+          description: Post found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Post not found
+    patch:
+      summary: Update post
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Post not found
+    delete:
+      summary: Delete post
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "204":
+          description: Post deleted
+        "404":
+          description: Post not found
+  /posts/{slug}/publish:
+    post:
+      summary: Publish a draft post
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Post not found
+        "409":
+          description: Already published
+  /authors:
+    get:
+      summary: List authors
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Author"
+  /authors/{id}:
+    get:
+      summary: Get author by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "404":
+          description: Author not found
+  /tags:
+    get:
+      summary: List all tags
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+  /tags/{name}/posts:
+    get:
+      summary: Get posts by tag
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostSummary"
+components:
+  schemas:
+    Post:
+      type: object
+      required:
+        - id
+        - slug
+        - title
+        - content
+        - author
+        - status
+        - tags
+      properties:
+        id:
+          type: integer
+          example: 42
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: "getting-started-with-apimock"
+        title:
+          type: string
+          maxLength: 200
+          example: "Getting Started with ApiMock"
+        content:
+          type: string
+          example: "# Getting Started\n\nApiMock is a tool for..."
+        excerpt:
+          type: string
+          maxLength: 500
+          example: "Learn how to use ApiMock to mock APIs from OpenAPI specs."
+        author:
+          $ref: "#/components/schemas/Author"
+        status:
+          type: string
+          enum: [draft, published]
+          default: draft
+        published_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        view_count:
+          type: integer
+          minimum: 0
+          default: 0
+    PostSummary:
+      type: object
+      required:
+        - id
+        - slug
+        - title
+        - excerpt
+        - author
+        - status
+        - published_at
+        - tags
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        excerpt:
+          type: string
+        author:
+          $ref: "#/components/schemas/Author"
+        status:
+          type: string
+          enum: [draft, published]
+        published_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+    PostInput:
+      type: object
+      required:
+        - title
+        - content
+        - tags
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          example: "My New Post"
+        content:
+          type: string
+          example: "# My Post\n\nContent here..."
+        tags:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          example: ["tutorial", "api"]
+    Author:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: "Jane Smith"
+        email:
+          type: string
+          format: email
+          example: "jane@example.com"
+        bio:
+          type: string
+          example: "Software developer and API enthusiast"
+        avatar_url:
+          type: string
+          format: uri
+          example: "https://example.com/avatars/jane.png"
+        website:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+    Tag:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: "tutorial"
+        description:
+          type: string
+        post_count:
+          type: integer
+          minimum: 0
