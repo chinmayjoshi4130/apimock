@@ -3,6 +3,7 @@
 import sys
 import json
 import asyncio
+import yaml
 from pathlib import Path
 
 import click
@@ -10,6 +11,7 @@ import click
 from apimock.parser.openapi import parse_file as parse_openapi, OpenApiParseError
 from apimock.parser.postman import parse_postman_file, PostmanParseError
 from apimock.parser.har import parse_har_file, HARParseError
+from apimock.parser.apimock_format import parse_apimock_file, ApiMockFormatError, is_apimock_format
 from apimock.mock.generator import create_generator
 from apimock.server.app import create_server, MockServer
 from apimock.config import create_config, Config
@@ -27,7 +29,15 @@ def detect_format(file_path: str) -> str:
         content = path.read_text(encoding="utf-8")
         data = json.loads(content)
     except (json.JSONDecodeError, UnicodeDecodeError):
-        return "openapi"  # Assume YAML
+        # Try to parse as YAML to check for ApiMock format
+        try:
+            data = yaml.safe_load(content)
+        except Exception:
+            return "openapi"  # Assume YAML OpenAPI
+
+    # Check for ApiMock native format
+    if is_apimock_format(data):
+        return "apimock"
 
     # Check for Postman Collection
     if "info" in data and "item" in data and isinstance(data.get("item"), list):
@@ -46,14 +56,16 @@ def parse_spec_file(file_path: str) -> tuple:
     fmt = detect_format(file_path)
 
     try:
-        if fmt == "postman":
+        if fmt == "apimock":
+            api = parse_apimock_file(file_path)
+        elif fmt == "postman":
             api = parse_postman_file(file_path)
         elif fmt == "har":
             api = parse_har_file(file_path)
         else:
             api = parse_openapi(file_path)
         return api, fmt
-    except (OpenApiParseError, PostmanParseError, HARParseError) as e:
+    except (OpenApiParseError, PostmanParseError, HARParseError, ApiMockFormatError) as e:
         raise AnyParseError(str(e))
 
 
@@ -67,7 +79,7 @@ def parse_spec_file(file_path: str) -> tuple:
 @click.option("--quiet", "-q", is_flag=True, help="Quiet output (no request logging)")
 @click.option("--watch", "-w", is_flag=True, help="Watch spec file for changes (not yet implemented)")
 @click.option("--json", "json_output", is_flag=True, help="Output machine-readable JSON")
-@click.option("--format", type=click.Choice(["auto", "openapi", "postman", "har"]), default="auto",
+@click.option("--format", type=click.Choice(["auto", "openapi", "postman", "har", "apimock"]), default="auto",
               help="Specification format (default: auto-detect)")
 @click.version_option(version="0.1.0", prog_name="ApiMock")
 def main(
@@ -82,12 +94,13 @@ def main(
     json_output: bool,
     format: str,
 ) -> None:
-    """ApiMock - Local API mocking from OpenAPI, Postman Collection, or HAR.
+    """ApiMock - Local API mocking from OpenAPI, Postman Collection, HAR, or native format.
 
     Example:
         apimock openapi.yaml
         apimock collection.json --format postman
         apimock archive.har --format har
+        apimock api.mock --format apimock
         apimock openapi.yaml --port 9000 --seed 42
     """
     config = create_config(
@@ -122,6 +135,8 @@ def run_server(config: Config, format: str = "auto") -> None:
         api, detected_fmt = parse_spec_file(config.spec_file)
         if not config.quiet and not config.json_output:
             click.echo(f"Detected format: {detected_fmt}")
+    elif format == "apimock":
+        api = parse_apimock_file(config.spec_file)
     elif format == "postman":
         api = parse_postman_file(config.spec_file)
     elif format == "har":

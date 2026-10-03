@@ -5,12 +5,13 @@ from copy import deepcopy
 
 
 def resolve_refs(schema: dict[str, Any], all_schemas: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    """Resolve all $ref references in a schema."""
+    """Resolve all $ref references and named type references in a schema."""
     if not isinstance(schema, dict):
         return schema
 
     result = deepcopy(schema)
 
+    # Handle $ref (OpenAPI style)
     if "$ref" in result:
         ref = result["$ref"]
         if ref.startswith("#/components/schemas/"):
@@ -18,6 +19,13 @@ def resolve_refs(schema: dict[str, Any], all_schemas: dict[str, dict[str, Any]])
             if schema_name in all_schemas:
                 return resolve_refs(all_schemas[schema_name], all_schemas)
         return result
+
+    # Handle named type references (ApiMock format): {"type": "UserName"}
+    if "type" in result and isinstance(result["type"], str):
+        type_name = result["type"]
+        if type_name in all_schemas and type_name not in ("string", "integer", "number", "boolean", "array", "object", "null"):
+            # This is a reference to a named schema
+            return resolve_refs(all_schemas[type_name], all_schemas)
 
     for key, value in result.items():
         if isinstance(value, dict):

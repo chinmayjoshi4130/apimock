@@ -1,0 +1,107 @@
+# ApiMock Native Format Example
+# 
+# A simpler, more concise format for defining mock APIs.
+# Supports both YAML and JSON.
+#
+# Usage: apimock api.mock --seed 42
+
+info:
+  title: "User Management API"
+  version: "1.0.0"
+  server: "http://localhost:8080"
+
+# Reusable schema definitions
+schemas:
+  # Simple type with format and constraints
+  UserId: "integer:1-999999"
+  
+  # Email string with format
+  Email: "string:email"
+  
+  # Enum type
+  UserRole: "string:enum(admin,user,guest)"
+  
+  # Object with required fields (marked with !)
+  User:
+    type: object
+    properties:
+      id: "integer:1-999999"
+      name: "string"
+      email: "string:email"
+      role: "string:enum(admin,user,guest)"
+      active: "boolean"
+      created_at: "string:date-time"
+    required: ["id", "name", "email"]
+  
+  # Input object (no id, no created_at)
+  UserInput:
+    type: object
+    properties:
+      name: "string"
+      email: "string:email"
+      role: "string:enum(admin,user,guest)"
+      active: "boolean"
+    required: ["name", "email"]
+  
+  # Array type
+  UserList: "array<User>"
+  
+  # Error response
+  Error:
+    type: object
+    properties:
+      code: "integer"
+      message: "string"
+
+# API Endpoints
+endpoints:
+  # Simple string format: "METHOD /path {inline_spec}"
+  - "GET /users {param:limit=integer:1-100=20, param:offset=integer:0-1000=0, resp:200=UserList}"
+  
+  # Full object format for more complex endpoints
+  - method: POST
+    path: "/users"
+    params: {}
+    body: "UserInput"
+    responses:
+      201: "User"
+      400: "Error"
+  
+  - method: GET
+    path: "/users/{id}"
+    params:
+      id: "UserId"
+    responses:
+      200: "User"
+      404: "Error"
+  
+  - method: PATCH
+    path: "/users/{id}"
+    params:
+      id: "UserId"
+    body: "UserInput"
+    responses:
+      200: "User"
+      404: "Error"
+  
+  - method: DELETE
+    path: "/users/{id}"
+    params:
+      id: "UserId"
+    responses:
+      204: "null"
+      404: "Error"
+
+# Additional endpoints with query parameters
+  - method: GET
+    path: "/search"
+    params:
+      q: "string"
+      type: "string:enum(user,post,comment)"
+      limit: "integer:1-50=10"
+    responses:
+      200:
+        type: object
+        properties:
+          results: "array<User>"
+          total: "integer"

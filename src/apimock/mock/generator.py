@@ -33,8 +33,12 @@ class MockGenerator:
         for name, schema in api.schemas.items():
             self.resolved_schemas[name] = resolve_refs(schema.schema, {n: s.schema for n, s in api.schemas.items()})
 
-    def generate(self, schema: dict[str, Any]) -> Any:
+    def generate(self, schema: dict[str, Any] | str) -> Any:
         """Generate mock data from a schema."""
+        # Handle string reference to named schema
+        if isinstance(schema, str):
+            schema = self._resolve_schema_ref(schema)
+        
         # Resolve any refs in the schema
         resolved = resolve_refs(schema, {n: s.schema for n, s in self.api.schemas.items()})
 
@@ -52,6 +56,14 @@ class MockGenerator:
             return self.rng.choice(enum_values)
 
         return self._generate_by_type(resolved)
+
+    def _resolve_schema_ref(self, ref: str) -> dict[str, Any]:
+        """Resolve a schema reference by name."""
+        if ref in self.api.schemas:
+            return self.api.schemas[ref].schema
+        # Try to parse as inline type spec
+        from apimock.parser.apimock_format import parse_type_spec
+        return parse_type_spec(ref)
 
     def _generate_by_type(self, schema: dict[str, Any]) -> Any:
         """Generate value based on schema type."""

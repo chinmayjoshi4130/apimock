@@ -5,6 +5,9 @@
 - [Getting Started](getting-started.md)
 - [CLI Reference](cli-reference.md)
 - [OpenAPI Support](openapi-support.md)
+- [ApiMock Native Format](apimock-format.md)
+- [Postman Collection Support](postman-support.md)
+- [HAR Support](har-support.md)
 - [Mock Data Generation](mock-data-generation.md)
 - [Configuration](configuration.md)
 - [Examples](examples.md)
@@ -37,6 +40,15 @@ pip install -e .
 # Start mock server from OpenAPI spec
 apimock openapi.yaml
 
+# From ApiMock native format
+apimock api.mock
+
+# From Postman Collection
+apimock collection.json
+
+# From HAR file
+apimock archive.har
+
 # With custom port and deterministic data
 apimock openapi.yaml --port 9000 --seed 42
 ```
@@ -52,3 +64,4 @@ apimock openapi.yaml --port 9000 --seed 42
 | `-v, --verbose` | Verbose request logging |
 | `-q, --quiet` | Suppress request logging |
 | `--json` | Machine-readable JSON output |
+| `--format` | Specification format (auto, openapi, postman, har, apimock) |
